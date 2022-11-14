@@ -14,9 +14,9 @@ function say {
 say "downloading id(s)"
 
 # Check for different output file
-if [ $# -eq 2 ]; then
+if [[ $# -eq 2 ]]; then
   formatted_file=$2
-  if [ $# -eq 3 ]; then
+  if [[ $# -eq 3 ]]; then
     downloader=$3
   fi
 fi
