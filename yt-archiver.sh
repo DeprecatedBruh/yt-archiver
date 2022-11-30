@@ -1,9 +1,11 @@
 #!/bin/bash
 
-archiver_name='yt-archiver'
-downloader='yt-dlp'
+archiver_name="yt-archiver"
+downloader="yt-dlp"
 unformatted_file="yt-archive-unformatted.log"
 formatted_file="yt-archive.log"
+url_prefix="youtube"
+url=""
 
 # Helper Functions
 function say {
@@ -13,21 +15,44 @@ function say {
 # Start
 say "downloading id(s)"
 
-# Check for different output file
-if [[ $# -eq 2 ]]; then
-  formatted_file=$2
-  if [[ $# -eq 3 ]]; then
-    downloader=$3
-  fi
-fi
+# Parse Arguments
+args=($@)
+
+for ((i = 0; i < "${#args[@]}"; i+=2)); do
+  next_arg="${args[$((i + 1))]}"
+  # Check for arg type
+  case "${args[$i]}" in
+    # Formatted File
+    -o | --formatted-file) 
+      formatted_file="$next_arg"
+    ;;
+    # Url Prefix
+    -u | --url-prefix)
+      url_prefix="$next_arg"
+    ;;
+    # Downloader Command Name
+    -d | --downloader)
+      downloader="$next_arg"
+    ;;
+    # Unformatted File Name
+    --unformatted-file)
+      unformatted_file="$next_arg"
+    ;;
+    # Ordered Args
+    *)
+      url="${args[$i]}"
+      ((--i)) # Decrement 'i' since ordered args only consume one argument
+    ;;
+  esac
+done
 
 # Get Ids
-$downloader -v --get-id $1 > $unformatted_file
+$downloader -v --get-id "$url" > $unformatted_file
 
 # Write ids to file in proper format
 say "formatting ids"
 while read -r line; do
-	echo "youtube $line" >> $formatted_file
+	echo "$url_prefix $line" >> $formatted_file
 done < $unformatted_file
 
 # Clean Up
